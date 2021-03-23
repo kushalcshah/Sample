@@ -1,0 +1,163 @@
+<html>
+  <head>
+    <meta charset='utf-8'/>
+    <title>My First Map</title>
+    <script type='text/javascript' src='libs\OpenLayers.js'></script>
+    <link rel="stylesheet" href="libs\style.css" />
+    <script src="libs\jquery-3.1.0.min.js"></script>
+
+    <script src="https://openlayers.org/en/v6.1.1/build/ol.js"></script>
+    <link rel="stylesheet" href="libs\ol.css" />
+
+<!-- layerswitcher -->
+    <link rel="stylesheet" href="libs\layerswitcher\ol-layerswitcher.css" />
+    <script type='text/javascript' src='libs\layerswitcher\ol-layerswitcher.js'></script>
+   
+  </head>
+    
+  
+
+
+
+
+  <body>
+    <div id="map">
+    </div>
+    <script type="text/javascript">
+    var view = new ol.View({
+	        projection: 'EPSG:4326',
+          center: [78.0,23.0],
+          zoom: 5,
+		  
+        });
+		var view_ov = new ol.View({
+        	projection: 'EPSG:4326',
+          center: [78.0,23.0],
+          zoom: 5,
+        });
+		
+		
+		var base_maps = new ol.layer.Group({
+                'title': 'Base maps',
+                layers: [
+
+						new ol.layer.Tile({
+                        title: 'ArcGIS',
+                        type: 'base',
+                        visible: true,
+						source: new ol.source.XYZ({
+						attributions: 'Powered by Esri',
+						Source: 'Esri, DigitalGlobe, GeoEye, Earthstar Geographics, CNES/Airbus DS, USDA, USGS, AeroGRID, IGN, and the GIS User Community',
+						url: 'https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+						})
+						}),
+
+            new ol.layer.Tile({
+                     title: 'OSM',
+                     type: 'base',
+                     visible: true,
+                     source: new ol.source.OSM()
+                    }),
+
+            new ol.layer.Tile({
+                    title: 'Arcgis Topographic',
+                    type: 'base',
+                    visible: true,
+                    source: new ol.source.XYZ({
+           attributions:
+           'Tiles © <a href="https://services.arcgisonline.com/ArcGIS/' +
+           'rest/services/World_Topo_Map/MapServer">ArcGIS</a>',
+           url:
+           'https://server.arcgisonline.com/ArcGIS/rest/services/' +
+           'World_Topo_Map/MapServer/tile/{z}/{y}/{x}',
+      }),
+    })
+                ]
+			
+            });
+
+    
+           
+            var styles = {
+          'Polygon': [new ol.style.Style({
+        stroke: new ol.style.Stroke({
+            color: 'blue',
+            lineDash: [4],
+            width: 3
+        }),
+        fill: new ol.style.Fill({
+            color: 'rgba(0, 0, 255, 0.1)'
+        })
+    })]
+  };
+        var styleFunction = function(feature, resolution) {
+  return styles[feature.getGeometry().getType()];
+};
+      var geojson_layer = new ol.layer.Vector({
+      source: new ol.source.Vector({
+      url: 'data\Ahmedabad_grid.geojson',
+        format: new ol.format.GeoJSON()
+    }),
+    style: styleFunction
+});    
+
+		var OSM = new ol.layer.Tile({
+            source: new ol.source.OSM(),
+			type: 'base',
+			title: 'OSM',
+          });
+    
+     var map = new ol.Map({
+        target: 'map',
+	    view: view,
+	      });
+
+       
+    map.addLayer(base_maps)
+    map.addLayer(geojson_layer)
+
+
+//controls
+
+  var overview = new ol.control.OverviewMap({
+    view: view_ov, 
+    collapseLabel:'O', 
+    label: 'O',
+    layers:[OSM]
+  });
+
+	  map.addControl(overview);
+    
+    var full_sc = new ol.control.FullScreen();
+	  map.addControl(full_sc);
+	
+	  var zoom = new ol.control.Zoom();
+  	map.addControl(zoom);
+	
+	  var slider = new ol.control.ZoomSlider();
+    map.addControl(slider);
+
+    var zoom_ex = new ol.control.ZoomToExtent({
+	  extent:[
+              65.90,7.48,
+               98.96,40.30
+            ]
+			});
+	  map.addControl(zoom_ex);
+
+//layerswitcher
+    var layerSwitcher = new ol.control.LayerSwitcher({
+    activationMode: 'click',
+    startActive: true,
+	  tipLabel: 'Layers', // Optional label for button
+    groupSelectStyle: 'none', // Can be 'children' [default], 'group' or 'none'
+    collapseTipLabel: 'Collapse layers',
+    });
+    map.addControl(layerSwitcher);
+  
+
+</script>
+
+  </body>
+
+</html>
